@@ -3,8 +3,11 @@ import numpy as np
 import json
 from pathlib import Path
 
-def J_troue_non_polaire(c_ext, c_in):
+def I_troue(c_ext, c_in):
     return np.pi / 4 * (c_ext**4 - c_in**4)
+
+def J_polaire(c_ext, c_in):
+    return I_troue(c_ext, c_in) * 2
 
 # l = module Lunaire
 # s = module de Service.
@@ -15,8 +18,11 @@ r_ext_l = r_int + epaisseur_l
 r_ext_s = r_int + epaisseur_s
 longueur_tunnel = 0.4064
 
-I_lunaire = J_troue_non_polaire(r_ext_l, r_int)
-I_service = J_troue_non_polaire(r_ext_s, r_int)
+I_lunaire = I_troue(r_ext_l, r_int)
+I_service = I_troue(r_ext_s, r_int)
+J_lunaire = J_polaire(r_ext_l, r_int)
+J_service = J_polaire(r_ext_s, r_int)
+
 
 print(I_lunaire, I_service)
 
@@ -36,7 +42,9 @@ Q = Aire_dune_section_s / 2 * 4*(r_ext_s - r_int) / (3*np.pi)
 
 def resultats():
     res = {"I_lunaire":I_lunaire, 
-           "I_service":I_service, 
+           "I_service":I_service,
+           "J_lunaire":J_lunaire,
+           "J_service":J_service,
            "Aire_dune_section_l":Aire_dune_section_l,
            "Aire_dune_section_s":Aire_dune_section_s,
            "section_rectangulaire_centre":section_rectangulaire_centre,

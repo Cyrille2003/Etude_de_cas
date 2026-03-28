@@ -1,6 +1,8 @@
 {
-    "I_lunaire": 0.0006361154127846922,
-    "I_service": 0.0012792873691924195,
+    "I_lunaire": 0.0003180577063923461,
+    "I_service": 0.0006396436845962098,
+    "J_lunaire": 0.0006361154127846922,
+    "J_service": 0.0012792873691924195,
     "Aire_dune_section_l": 0.003837298346727206,
     "Aire_dune_section_s": 0.007688733860395623,
     "section_rectangulaire_centre": 0.0024384,
