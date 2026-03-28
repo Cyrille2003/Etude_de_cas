@@ -3,7 +3,7 @@ import numpy as np
 import json
 from pathlib import Path
 
-def J_troue(c_ext, c_in):
+def J_troue_non_polaire(c_ext, c_in):
     return np.pi / 4 * (c_ext**4 - c_in**4)
 
 # l = module Lunaire
@@ -15,8 +15,8 @@ r_ext_l = r_int + epaisseur_l
 r_ext_s = r_int + epaisseur_s
 longueur_tunnel = 0.4064
 
-I_lunaire = J_troue(r_ext_l, r_int)
-I_service = J_troue(r_ext_s, r_int)
+I_lunaire = J_troue_non_polaire(r_ext_l, r_int)
+I_service = J_troue_non_polaire(r_ext_s, r_int)
 
 print(I_lunaire, I_service)
 
