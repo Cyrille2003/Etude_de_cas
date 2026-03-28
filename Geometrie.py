@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 def J_troue(c_ext, c_in):
-    return np.pi / 2 * (c_ext**4 - c_in**4)
+    return np.pi / 4 * (c_ext**4 - c_in**4)
 
 # l = module Lunaire
 # s = module de Service.
