@@ -1,7 +1,7 @@
-#let etat_1 = json("ETATS.json").at(0)
-#let etat_2 = json("ETATS.json").at(1)
-#let etat_3 = json("ETATS.json").at(2)
-#let etat_4 = json("ETATS.json").at(3)
+#let etat_1 = json("ETATS.json").5
+#let etat_2 = json("ETATS.json").2
+#let etat_3 = json("ETATS.json").3
+#let etat_4 = json("ETATS.json").4
 
 #align(center)[
   #table(
@@ -14,3 +14,4 @@
 
   )
 ]
+
