@@ -7,5 +7,7 @@
     "Aire_dune_section_s": 0.007688733860395623,
     "section_rectangulaire_centre": 0.0024384,
     "Aire_disque_interne": 0.5188684585958376,
-    "Q": 4.8947999999999815e-06
+    "Q": 0.0009982989600000047,
+    "Q_rect_s": 0.00012387072,
+    "I_rect_s": 3.3560707072e-05
 }

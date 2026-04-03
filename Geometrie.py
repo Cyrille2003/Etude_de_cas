@@ -36,7 +36,15 @@ section_rectangulaire_centre = epaisseur_s * 2 * longueur_tunnel
 
 Aire_disque_interne = np.pi * r_int**2
 
-Q = Aire_dune_section_s / 2 * 4*(r_ext_s - r_int) / (3*np.pi)
+def y(r):
+    return 4*r/(3*np.pi)
+def A(r):
+    return np.pi*r**2
+Q = y(r_ext_s)*A(r_ext_s)/2 - y(r_int)*A(r_int)/2
+print(Q)
+Q_rect_s = section_rectangulaire_centre / 2 * (longueur_tunnel / 4)
+
+I_rect_s = 2* epaisseur_s*longueur_tunnel**3 / 12
 
 
 
@@ -49,7 +57,10 @@ def resultats():
            "Aire_dune_section_s":Aire_dune_section_s,
            "section_rectangulaire_centre":section_rectangulaire_centre,
            "Aire_disque_interne":Aire_disque_interne,
-           "Q":Q
+           "Q":Q,
+           "Q_rect_s":Q_rect_s,
+           "I_rect_s":I_rect_s
+
            }
     chemin = Path(__file__).parent / "resultats.json"
     
@@ -60,3 +71,4 @@ def resultats():
 resultats()
 
         
+print(J_service)
