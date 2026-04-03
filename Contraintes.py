@@ -2,23 +2,18 @@ import numpy as np
 from pathlib import Path
 import json
 from Geometrie import r_int, epaisseur_s, r_ext_s, longueur_tunnel
-
 from pathlib import Path
-chemin = Path(__file__).parent / "resultats.json"
 
+chemin = Path(__file__).parent / "resultats.json"
 with open(chemin, encoding="utf-8") as fichier:
     data = json.load(fichier)
-
-print(data)    
-q = data["Q"]
-print(q)
 
 E = 73.1e9                      
 G = 27e9
 to_max = 172e6                     # À changer lorsqu'on aura trouvé to_max.
 sigma_max = 414e6                  # À changer.
 bras_levier_reacteur = b_l = 154*0.0254/2
-dist_reac_mur = (10*12 + 1) * 12 * 0.0254 + longueur_tunnel
+dist_reac_mur = (161.2) * 0.0254
 
 
 def cisaillement_pur(V, Q, I, t):
@@ -32,24 +27,15 @@ def cisaillement_pur(V, Q, I, t):
     tho = V*Q/(I*t)
     return tho
 
-
-
 def Pression_axiale(P, r, t):
     return P*r/(2*t)
 
 def Pression_circonferentielle(P, r, t):
     return P*r/(t)
 
-
-def cisaillement_combine(force, aire, *autres_params):
-    contrainte = force/aire
-    return contrainte
-
-
 def flexion_pure(Moment, position, I):
     contrainte_locale = Moment*position/I
     return contrainte_locale
-
 
 def compression(force, aire):
     contrainte = force / aire
@@ -57,7 +43,6 @@ def compression(force, aire):
 
 def cisaillement_de_torsion(T, rho, J):
     return T*rho/J
-
 
 def Config_1():
     """
@@ -98,7 +83,7 @@ def Config_3():
     force = np.sqrt(2) * 446
     cisaillement = cisaillement_pur(V=force, Q = data["Q_rect_s"], I=data["I_rect_s"], t=2*epaisseur_s)
     cisaillement = round(cisaillement/1e6, 2), round(to_max/cisaillement, 2)
-    normale = flexion_pure(Moment=446*2*b_l, position=r_ext_s, I=data["I_service"]) + compression(91.2e3, data["Aire_dune_section_s"]) - Pression_axiale(34.5e3, r_int, epaisseur_s)
+    normale = flexion_pure(Moment=force*2*b_l, position=r_ext_s, I=data["I_service"]) + compression(91.2e3, data["Aire_dune_section_s"]) - Pression_axiale(34.5e3, r_int, epaisseur_s)
     facteur_sec = sigma_max / normale
     normale = round(normale/1e6, 2), round(facteur_sec, 2)
     return cisaillement, normale
@@ -109,19 +94,46 @@ def Config_4():
     On a aussi de la compression due à la flexion.
     Pour la compression, on considérera la traction et on l'additionnera à la pression axiale. On aura donc une contrainte normale axiale maximale.
     La force maximale est 446*2 * (2*sqrt(2)). Justification : on réoriente les axes de sorte que les composantes verticales s'additionnent.
+    
+    On prend donc : 
+        Compression due au moment de flexion
+        + la compression du réacteur principal
+        - la traction due à la pression.   
     """
     force = 2*np.sqrt(2)*446
-    print(data["Q"])
-    print(data["I_service"])
-    print(2*epaisseur_s)
     cisaillement = cisaillement_pur(V=force, Q=data["Q"], I=data["I_service"], t= 2*epaisseur_s)
-    print("CISAILLEMENT", cisaillement)
     facteur_sec_cis = to_max/cisaillement
     cisaillement = round(cisaillement/1e6, 4), round(facteur_sec_cis, 2)
-    normale = flexion_pure(Moment=force*dist_reac_mur, position=r_ext_s, I=data["I_service"]) + Pression_axiale(P=34.5e3, r=r_int, t=epaisseur_s)
+    normale = flexion_pure(Moment=force*dist_reac_mur, position=r_ext_s, I=data["I_service"]) +compression(force=91.2e3, aire=data["Aire_dune_section_s"]) - Pression_axiale(P=34.5e3, r=r_int, t=epaisseur_s)
     facteur_sec_normale = sigma_max / normale
     normale = round(normale/1e6, 2), round(facteur_sec_normale, 2)
     return cisaillement, normale
+
+def Config_5():
+    """
+    Il s'agit simplement de la somme des configurations 3 et 4.
+    La compression maximale se trouvera dans la situation où le propulseur principal est activé.
+    (Même si la traction, sans le propulseur, serait plus grande, rajouter le propulseur principal prévaut.)
+    """
+    cisaillement = Config_3()[0]            # C'est le cisaillement maximal entre la config 3 et la config 4
+
+    force3 = 2*np.sqrt(2) * 446
+    force4 = 2*np.sqrt(2)*446
+    moment3 = force3*b_l
+    moment4 = force4*dist_reac_mur
+    comp3 = flexion_pure(Moment=moment3, position=r_ext_s, I=data["I_service"])
+    comp4 = flexion_pure(Moment=moment4, position=r_ext_s, I=data["I_service"])
+    reac_principal = compression(force=91.2e3, aire=data["Aire_dune_section_s"])
+    press_axial = Pression_axiale(P=34.5e3, r=r_int, t=epaisseur_s)
+    print("comp3", comp3/1e6)
+    print("comp4", comp4/1e6)
+    print("reac_principal", reac_principal/1e6)
+    print("press_axial", press_axial/1e6)
+    normale =  comp3+comp4+reac_principal-press_axial
+    facteur_sec_normale = sigma_max/normale
+    normale = round(normale/1e6, 2), round(facteur_sec_normale, 2)
+    return cisaillement, normale
+
 
 def Petit_Tunnel():
     normale_max = max(Pression_axiale(P=34.5e3, r=r_int, t=0.0015), Pression_circonferentielle(P=34.5, r=r_int, t=0.0015))
@@ -132,12 +144,17 @@ def Petit_Tunnel():
 
 chemin = Path(__file__).parent / "ETATS.json"
 with open (chemin, mode="w", encoding="utf-8") as fichier:
-    res = {"1":Config_1(), "2":Config_2(), "3":Config_3(), "4":Config_4(), "Petit tunnel":Petit_Tunnel()}
+    res = {"1":Config_1(), 
+           "2":Config_2(), 
+           "3":Config_3(), 
+           "4":Config_4(), 
+           "5":Config_5(),
+           "Petit tunnel":Petit_Tunnel(),
+           }
     json.dump(res, fichier, indent=4)
     print("Les résultats pour les différentes configurations ont été consignés dans le fichier JSON")
 
 
-print(3.14159/4*(.4094**4 - .4064**4))
 
-
-print(np.pi*(r_ext_s**2 - r_int**2))
+print("Contrainte de réacteur principal", 91.2e3/1e6/(np.pi*(r_ext_s**2-r_int**2)))
+print("Contrainte pression", Pression_axiale(34.5e3, r=r_int, t=epaisseur_s)/1e6)
