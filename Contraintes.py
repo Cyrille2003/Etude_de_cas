@@ -81,7 +81,8 @@ def Config_3():
     On multiplie la force par la racine de 2 parce qu'il faut tenir compte de l'orientation combinée des vecteurs.
     """
     force = np.sqrt(2) * 446
-    cisaillement = cisaillement_pur(V=force, Q = data["Q_rect_s"], I=data["I_rect_s"], t=2*epaisseur_s)
+
+    cisaillement = 2*446/(0.003 * 0.4064*2)
     cisaillement = round(cisaillement/1e6, 2), round(to_max/cisaillement, 2)
     normale = flexion_pure(Moment=force*2*b_l, position=r_ext_s, I=data["I_service"]) + compression(91.2e3, data["Aire_dune_section_s"]) - Pression_axiale(34.5e3, r_int, epaisseur_s)
     facteur_sec = sigma_max / normale
